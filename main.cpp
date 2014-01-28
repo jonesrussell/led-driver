@@ -34,9 +34,9 @@ int main(int argc, char *argv[])
     LedDriverLightpack lightpack;
 
     lightpack.Open();
-    lightpack.SetOption("set-refresh-delay", 100);
-    lightpack.SetOption("set-color-depth", 128);
-    lightpack.SetOption("set-smooth-slowdown", 255);
+    lightpack.SetOption("refresh-delay", 100);
+    lightpack.SetOption("color-depth", 128);
+    lightpack.SetOption("smooth-slowdown", 255);
 
     LedColors colors(LP_LEDS);
 
