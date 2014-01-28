@@ -148,14 +148,17 @@ void LedDriverLightpack::SetOption(const char *option, int value)
         op = LPOP_SET_TIMER_OPTIONS;
         buffer_write[LP_INDEX_DATA] = value & 0xFF;
         buffer_write[LP_INDEX_DATA + 1] = (value >> 8);
+        std::cerr << "refresh-delay: " << value << std::endl;
     }
     else if (strcmp(option, "color-depth") == 0) {
         op = LPOP_SET_PWM_LEVEL_MAX_VALUE;
         buffer_write[LP_INDEX_DATA] = (unsigned char)value;
+        std::cerr << "color-depth: " << value << std::endl;
     }
     else if (strcmp(option, "smooth-slowdown") == 0) {
         op = LPOP_SET_SMOOTH_SLOWDOWN;
         buffer_write[LP_INDEX_DATA] = (unsigned char)value;
+        std::cerr << "smooth-slowdown: " << value << std::endl;
     }
 
     if (op == LPOP_NOP)

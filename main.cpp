@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <unistd.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -36,19 +37,25 @@ int main(int argc, char *argv[])
 
     lightpack.Open();
 
-    if (argc == 2 && !strcmp(argv[1], "off")) {
+    if (argc == 2 && strcmp(argv[1], "on") == 0) {
+        FILE *ph = popen("led-driver 2>/tmp/led-driver.log &", "r");
+        return 0;
+    }
+    else if (argc == 2 && strcmp(argv[1], "off") == 0) {
         lightpack.SetLedsOff();
         lightpack.Close();
         return 0;
     }
 
     lightpack.SetOption("refresh-delay", 100);
+    //lightpack.SetOption("refresh-delay", 10);
     lightpack.SetOption("color-depth", 128);
     lightpack.SetOption("smooth-slowdown", 255);
 
     LedColors colors(LP_LEDS);
 
     for ( ;; ) {
+#if 1
         for (int l = 0; l < LP_LEDS; l++) {
             switch (rand() % 7) {
             case 0:
@@ -91,6 +98,24 @@ int main(int argc, char *argv[])
 
         lightpack.SetLedColors(colors);
         usleep(1500000);
+#else
+        lightpack.SetOption("smooth-slowdown", 0);
+        lightpack.SetLedsOff();
+
+        for (int l = 0; l < LP_LEDS; l++) {
+            colors[l].r = 255;
+            colors[l].g = 0;
+            colors[l].b = 0;
+        }
+
+        lightpack.SetLedColors(colors);
+        usleep(500000);
+
+        lightpack.SetLedsOff();
+        lightpack.SetOption("smooth-slowdown", 255);
+        lightpack.SetLedColors(colors);
+        usleep(1500000);
+#endif
     }
 
     return 0;
