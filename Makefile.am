@@ -21,3 +21,6 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status libtool
 
+dist-hook:
+	@cp -a $(srcdir)/hidapi $(distdir)
+	@cp -a $(srcdir)/include $(distdir)

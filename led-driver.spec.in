@@ -1,1 +1,46 @@
-# TODO
+# LED Driver RPM spec
+Name: @PACKAGE_TARNAME@
+Version: @PACKAGE_VERSION@
+URL: @PACKAGE_URL@
+Release: 1%{dist}
+Vendor: Darryl Sokoloski <darryl@sokoloski.ca>
+License: GPL
+Group: Applications/Multimedia
+Packager: Darryl Sokoloski <darryl@sokoloski.ca>
+Source: %{name}-%{version}.tar.gz
+BuildRoot: /var/tmp/%{name}-%{version}
+Summary: @PACKAGE_NAME@
+BuildRequires: libusb1-devel glibc-headers
+Requires: libusb1
+
+%description
+@PACKAGE_NAME@
+For more information, visit: @PACKAGE_URL@
+
+# Build
+%prep
+%setup -q
+./autogen.sh
+%{configure}
+
+%build
+make %{?_smp_mflags}
+
+# Install
+%install
+make install DESTDIR=$RPM_BUILD_ROOT
+
+# Clean-up
+%clean
+[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+
+# Files
+%files
+%defattr(-,root,root)
+%{_bindir}/%{name}
+%{_libdir}/lib%{name}.*
+
+# Change log
+%changelog
+
+# vi: expandtab shiftwidth=4 softtabstop=4 tabstop=4
