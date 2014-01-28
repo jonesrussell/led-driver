@@ -1,0 +1,23 @@
+AUTOMAKE_OPTIONS = foreign
+
+ACLOCAL_AMFLAGS = -I m4
+
+AM_CFLAGS = ${CFLAGS} -I ./include -I ./hidapi -I /usr/include/libusb-1.0
+AM_CXXFLAGS = ${CXXFLAGS} -I ./include -I ./hidapi -I /usr/include/libusb-1.0
+
+lib_LTLIBRARIES = libled-driver.la
+libled_driver_la_SOURCES = ld-abstract.cpp ld-lightpack.cpp ./hidapi/linux/hid-libusb.c
+libled_driver_la_CFLAGS = ${AM_CFLAGS}
+libled_driver_la_CXXFLAGS = ${AM_CXXFLAGS}
+
+bin_PROGRAMS = led-driver
+led_driver_SOURCES = main.cpp
+led_driver_LDADD = libled-driver.la
+led_driver_CXXFLAGS = ${AM_CXXFLAGS}
+
+EXTRA_DIST = autogen.sh
+
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
+libtool: $(LIBTOOL_DEPS)
+	$(SHELL) ./config.status libtool
+

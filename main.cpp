@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <locale>
 #include <iostream>
 #include <vector>
@@ -48,9 +52,7 @@ int main(int argc, char *argv[])
     }
 
     lightpack.SetOption("refresh-delay", 100);
-    //lightpack.SetOption("refresh-delay", 10);
     lightpack.SetOption("color-depth", 128);
-    lightpack.SetOption("smooth-slowdown", 255);
 
     LedColors colors(LP_LEDS);
 
@@ -96,7 +98,9 @@ int main(int argc, char *argv[])
             }
         }
 
+        lightpack.SetOption("smooth-slowdown", 255);
         lightpack.SetLedColors(colors);
+        //usleep(50000);
         usleep(1500000);
 #else
         lightpack.SetOption("smooth-slowdown", 0);
