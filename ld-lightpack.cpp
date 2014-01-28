@@ -65,16 +65,16 @@ void LedDriverLightpack::Open(void)
                 
                 if(device->serial_number != NULL &&
                     wcslen(device->serial_number) > 0) {
-                    std::cerr << "found Lightpack: "
+                    std::cerr << "found lightpack: "
                         << device->path << std::endl;
                 }
                 else {
-                    std::cerr << "found Lightpack, no serial: "
+                    std::cerr << "found lightpack, no serial: "
                         << device->path << std::endl;
                 }
             }
             else
-                std::cerr << "Lightpack not found" << std::endl;
+                std::cerr << "lightpack not found" << std::endl;
 
             break;
         }
@@ -169,7 +169,7 @@ bool LedDriverLightpack::Read(void)
     int bytes = hid_read(dh, buffer_read, LP_BUFFER_SIZE);
         
     if (bytes < 0) {
-        std::cerr << "Error reading from device" << std::endl;
+        std::cerr << "error reading data" << std::endl;
         return false;
     }
 
@@ -186,7 +186,7 @@ bool LedDriverLightpack::Write(int opcode)
         // Try again...
         rc = hid_write(dh, buffer_write, LP_BUFFER_SIZE);
         if(rc < 0) {
-            std::cerr << "Error writing data: " << rc << std::endl;
+            std::cerr << "error writing data: " << rc << std::endl;
             return false;
         }
     }
