@@ -105,8 +105,8 @@ void LedDriverLightpack::SetLedColors(LedColors &colors)
 {
     int index;
     const size_t led_color_size = 6;
-    //const int led_remap[LP_LEDS] = { 4, 3, 2, 0, 1, 5, 6, 7, 8, 9 };
-    const int led_remap[LP_LEDS] = { 4, 3, 0, 1, 2, 5, 6, 7, 8, 9 };
+    //const int led_remap_default[LP_LEDS] = { 4, 3, 2, 0, 1, 5, 6, 7, 8, 9 };
+    const int led_remap_custom[LP_LEDS] = { 4, 3, 0, 1, 2, 5, 6, 7, 8, 9 };
     const double k = 4095 / 255.0;
 
     memset(buffer_write, 0, LP_BUFFER_SIZE);
@@ -119,11 +119,12 @@ void LedDriverLightpack::SetLedColors(LedColors &colors)
         color.g = colors[i].g * k;
         color.b = colors[i].b * k;
 
-        // No remap:
+        // No remap
         //index = LP_INDEX_DATA + i * led_color_size;
-
-        // Remapped
-        index = LP_INDEX_DATA + led_remap[i % LP_LEDS] * led_color_size;
+        // Default remap
+        //index = LP_INDEX_DATA + led_remap_default[i % LP_LEDS] * led_color_size;
+        // Custom remap
+        index = LP_INDEX_DATA + led_remap_custom[i % LP_LEDS] * led_color_size;
 
         // Send main 8 bits for compability with existing devices
         buffer_write[index++] = (color.r & 0x0FF0) >> 4;
