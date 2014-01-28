@@ -20,6 +20,7 @@
 
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "hidapi.h"
 
@@ -34,6 +35,13 @@ int main(int argc, char *argv[])
     LedDriverLightpack lightpack;
 
     lightpack.Open();
+
+    if (argc == 2 && !strcmp(argv[1], "off")) {
+        lightpack.SetLedsOff();
+        lightpack.Close();
+        return 0;
+    }
+
     lightpack.SetOption("refresh-delay", 100);
     lightpack.SetOption("color-depth", 128);
     lightpack.SetOption("smooth-slowdown", 255);
