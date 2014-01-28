@@ -54,35 +54,35 @@ void LedDriverLightpack::Open(void)
 {
     struct hid_device_info *device, *devices;
 
-	device = devices = hid_enumerate(LP_USB_VID, LP_USB_PID);
+    device = devices = hid_enumerate(LP_USB_VID, LP_USB_PID);
 
-	while (device) {
-		if (device->path) {
-			dh = hid_open_path(device->path);
+    while (device) {
+        if (device->path) {
+            dh = hid_open_path(device->path);
 
-			if(dh != NULL) {
-				hid_set_nonblocking(dh, 1);
-				
-				if(device->serial_number != NULL &&
+            if(dh != NULL) {
+                hid_set_nonblocking(dh, 1);
+                
+                if(device->serial_number != NULL &&
                     wcslen(device->serial_number) > 0) {
                     std::cerr << "found Lightpack: "
                         << device->path << std::endl;
                 }
                 else {
-					std::cerr << "found Lightpack, no serial: "
+                    std::cerr << "found Lightpack, no serial: "
                         << device->path << std::endl;
                 }
-			}
-			else
-				std::cerr << "Lightpack not found" << std::endl;
+            }
+            else
+                std::cerr << "Lightpack not found" << std::endl;
 
             break;
-		}
+        }
 
-		device = device->next;
-	}
+        device = device->next;
+    }
 
-	hid_free_enumeration(devices);
+    hid_free_enumeration(devices);
 
     if (dh == NULL)
         throw std::runtime_error("no devices found");
@@ -103,16 +103,16 @@ void LedDriverLightpack::SetLedsOff(void)
 
 void LedDriverLightpack::SetLedColors(LedColors &colors)
 {
-	int index;
-	const size_t led_color_size = 6;
-	//const int led_remap[LP_LEDS] = { 4, 3, 2, 0, 1, 5, 6, 7, 8, 9 };
-	const int led_remap[LP_LEDS] = { 4, 3, 0, 1, 2, 5, 6, 7, 8, 9 };
-	const double k = 4095 / 255.0;
+    int index;
+    const size_t led_color_size = 6;
+    //const int led_remap[LP_LEDS] = { 4, 3, 2, 0, 1, 5, 6, 7, 8, 9 };
+    const int led_remap[LP_LEDS] = { 4, 3, 0, 1, 2, 5, 6, 7, 8, 9 };
+    const double k = 4095 / 255.0;
 
-	memset(buffer_write, 0, LP_BUFFER_SIZE);
+    memset(buffer_write, 0, LP_BUFFER_SIZE);
 
-	for (int i = 0; i < colors.size(); i++) {
-		LedColor color;
+    for (int i = 0; i < colors.size(); i++) {
+        LedColor color;
 
         // Normalize to 12-bit
         color.r = colors[i].r * k;
@@ -120,23 +120,23 @@ void LedDriverLightpack::SetLedColors(LedColors &colors)
         color.b = colors[i].b * k;
 
         // No remap:
-		//index = LP_INDEX_DATA + i * led_color_size;
+        //index = LP_INDEX_DATA + i * led_color_size;
 
         // Remapped
-		index = LP_INDEX_DATA + led_remap[i % LP_LEDS] * led_color_size;
+        index = LP_INDEX_DATA + led_remap[i % LP_LEDS] * led_color_size;
 
-		// Send main 8 bits for compability with existing devices
-		buffer_write[index++] = (color.r & 0x0FF0) >> 4;
-		buffer_write[index++] = (color.g & 0x0FF0) >> 4;
-		buffer_write[index++] = (color.b & 0x0FF0) >> 4;
+        // Send main 8 bits for compability with existing devices
+        buffer_write[index++] = (color.r & 0x0FF0) >> 4;
+        buffer_write[index++] = (color.g & 0x0FF0) >> 4;
+        buffer_write[index++] = (color.b & 0x0FF0) >> 4;
 
-		// Send over 4 bits for devices revision >= 6, ignored by existing devices
-		buffer_write[index++] = (color.r & 0x000F);
-		buffer_write[index++] = (color.g & 0x000F);
-		buffer_write[index++] = (color.b & 0x000F);
-	}
+        // Send over 4 bits for devices revision >= 6, ignored by existing devices
+        buffer_write[index++] = (color.r & 0x000F);
+        buffer_write[index++] = (color.g & 0x000F);
+        buffer_write[index++] = (color.b & 0x000F);
+    }
 
-	Write(LPOP_LED_UPDATE);
+    Write(LPOP_LED_UPDATE);
 }
 
 void LedDriverLightpack::SetOption(const char *option, int value)
@@ -150,7 +150,7 @@ void LedDriverLightpack::SetOption(const char *option, int value)
     }
     else if (strcmp(option, "set-color-depth") != 0) {
         op = LPOP_SET_PWM_LEVEL_MAX_VALUE;
-	    buffer_write[LP_INDEX_DATA] = (unsigned char)value;
+        buffer_write[LP_INDEX_DATA] = (unsigned char)value;
     }
     else if (strcmp(option, "set-smooth-slowdown") != 0) {
         op = LPOP_SET_SMOOTH_SLOWDOWN;
@@ -165,32 +165,32 @@ void LedDriverLightpack::SetOption(const char *option, int value)
 
 bool LedDriverLightpack::Read(void)
 {
-	int bytes = hid_read(dh, buffer_read, LP_BUFFER_SIZE);
+    int bytes = hid_read(dh, buffer_read, LP_BUFFER_SIZE);
         
-	if (bytes < 0) {
-		std::cerr << "Error reading from device" << std::endl;
-		return false;
-	}
+    if (bytes < 0) {
+        std::cerr << "Error reading from device" << std::endl;
+        return false;
+    }
 
     return true;
 }
 
 bool LedDriverLightpack::Write(int opcode)
 {
-	buffer_write[LP_INDEX_RID] = 0x00;
-	buffer_write[LP_INDEX_OPCODE] = (unsigned char)opcode;
+    buffer_write[LP_INDEX_RID] = 0x00;
+    buffer_write[LP_INDEX_OPCODE] = (unsigned char)opcode;
     
-	int rc = hid_write(dh, buffer_write, LP_BUFFER_SIZE);
-	if (rc < 0) {
+    int rc = hid_write(dh, buffer_write, LP_BUFFER_SIZE);
+    if (rc < 0) {
         // Try again...
-		rc = hid_write(dh, buffer_write, LP_BUFFER_SIZE);
-		if(rc < 0) {
-			std::cerr << "Error writing data: " << rc << std::endl;
-			return false;
-		}
-	}
+        rc = hid_write(dh, buffer_write, LP_BUFFER_SIZE);
+        if(rc < 0) {
+            std::cerr << "Error writing data: " << rc << std::endl;
+            return false;
+        }
+    }
 
-	return true;
+    return true;
 }
 
 // vi: expandtab shiftwidth=4 softtabstop=4 tabstop=4
