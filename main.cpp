@@ -37,35 +37,42 @@ int main(int argc, char *argv[])
     LedColors colors(LP_LEDS);
 
     for ( ;; ) {
-        for (int l = 0; l < LP_LEDS; l++)
-            colors[l].r = colors[l].g = colors[l].b = 0;
-
         for (int l = 0; l < LP_LEDS; l++) {
             switch (rand() % 7) {
             case 0:
                 colors[l].r = 255;
+                colors[l].g = 0;
+                colors[l].b = 0;
                 break;
             case 1:
+                colors[l].r = 0;
                 colors[l].g = 255;
+                colors[l].b = 0;
                 break;
             case 2:
+                colors[l].r = 0;
+                colors[l].g = 0;
                 colors[l].b = 255;
                 break;
             case 3:
                 colors[l].r = 255;
                 colors[l].g = 255;
+                colors[l].b = 0;
                 break;
             case 4:
+                colors[l].r = 0;
                 colors[l].g = 255;
                 colors[l].b = 255;
                 break;
             case 5:
                 colors[l].b = 255;
+                colors[l].g = 0;
                 colors[l].r = 255;
                 break;
             case 6:
                 colors[l].b = 255;
                 colors[l].g = 255;
+                colors[l].r = 0;
                 break;
             }
         }
