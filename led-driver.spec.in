@@ -2,19 +2,21 @@
 Name: @PACKAGE_TARNAME@
 Version: @PACKAGE_VERSION@
 URL: @PACKAGE_URL@
-Release: 1%{dist}
+Release: 8%{dist}
 Vendor: Darryl Sokoloski <darryl@sokoloski.ca>
 License: GPL
 Group: Applications/Multimedia
 Packager: Darryl Sokoloski <darryl@sokoloski.ca>
 Source: %{name}-%{version}.tar.gz
 BuildRoot: /var/tmp/%{name}-%{version}
-Summary: @PACKAGE_NAME@
+Summary: Generic LED Driver with Lightpack support.
 BuildRequires: libusb1-devel glibc-headers
-Requires: libusb1
+Requires: libusb1 initscripts /sbin/service
+Requires(post): /sbin/chkconfig
+Requires(preun): /sbin/chkconfig
 
 %description
-@PACKAGE_NAME@
+Generic LED Driver with Lightpack support.
 For more information, visit: @PACKAGE_URL@
 
 # Build
@@ -29,16 +31,32 @@ make %{?_smp_mflags}
 # Install
 %install
 make install DESTDIR=$RPM_BUILD_ROOT
+mkdir -vp ${RPM_BUILD_ROOT}/%{_sysconfdir}/init.d
+cp -v %{name}.init ${RPM_BUILD_ROOT}/%{_sysconfdir}/init.d/%{name}
+mkdir -vp ${RPM_BUILD_ROOT}/%{_localstatedir}/run/%{name}
 
 # Clean-up
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
+%preun
+if [ $1 -eq 0 ]; then
+    /sbin/chkconfig --del %{name}
+fi
+
+# Post install
+%post
+/sbin/chkconfig --add %{name} >/dev/null 2>&1 || :
+/sbin/service %{name} restart >/dev/null 2>&1 || :
+
 # Files
 %files
 %defattr(-,root,root)
-%{_bindir}/%{name}
+%{_bindir}/led-ctrl
+%{_sbindir}/led-server
 %{_libdir}/lib%{name}.*
+%attr(755,root,root) %{_sysconfdir}/init.d/%{name}
+%attr(755,%{name},%{name}) %{_localstatedir}/run/%{name}
 
 # Change log
 %changelog

@@ -1,6 +1,6 @@
 AC_PREREQ([2.63])
 AC_INIT([led-driver], [1.0], [https://github.com/dsokoloski/led-driver/issues])
-AC_CONFIG_SRCDIR([main.cpp])
+AC_CONFIG_SRCDIR([led-ctrl.cpp])
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -35,7 +35,12 @@ AC_CHECK_HEADERS([libusb-1.0/libusb.h], [], [],
 # Checks for library functions.
 #AC_CHECK_FUNCS([memset socket strerror])
 
+# Check if PACKAGE_URL is defined
+if test -z "$PACKAGE_URL"; then
+	AC_SUBST([PACKAGE_URL], [https://github.com/dsokoloski/led-driver])
+fi
+
 # Output
-AC_CONFIG_FILES([Makefile led-driver.spec])
+AC_CONFIG_FILES([Makefile led-driver.spec led-driver.init])
 AC_OUTPUT
 

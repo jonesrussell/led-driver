@@ -1,0 +1,88 @@
+#!/bin/bash
+
+# @PACKAGE_TARNAME@    Start up the @PACKAGE_NAME@ daemon
+#
+# chkconfig: 2345 55 25
+# description: @PACKAGE_NAME@ daemon
+#
+# processname: @PACKAGE_TARNAME@
+# pidfile: /var/run/@PACKAGE_TARNAME@/led-server.pid
+
+### BEGIN INIT INFO
+# Provides: @PACKAGE_TARNAME@
+# Required-Start: $local_fs $network $syslog
+# Required-Stop: $local_fs $syslog
+# Should-Start: $syslog
+# Should-Stop: $network $syslog
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Start up the @PACKAGE_NAME@ daemon
+# Description: @PACKAGE_NAME@ daemon
+### END INIT INFO
+
+# Source function library.
+. /etc/init.d/functions
+
+RETVAL=0
+PROG=led-server
+PID_FILE=/var/run/@PACKAGE_TARNAME@/${PROG}.pid
+
+start() {
+    echo -n "Starting @PACKAGE_TARNAME@: "
+    #daemon --user @PACKAGE_TARNAME@ /usr/sbin/$PROG
+    daemon /usr/sbin/$PROG
+    success
+    RETVAL=$?
+    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/$PROG
+    echo
+    return $RETVAL
+}   
+
+stop() {
+    echo -n "Shutting down @PACKAGE_TARNAME@: "
+    killproc $PROG
+    RETVAL=$?
+    [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/$PROG
+    echo
+    return $RETVAL
+}
+
+case "$1" in
+    start)
+        start
+    ;;
+    stop)
+        stop
+    ;;
+    status)
+        status @PACKAGE_TARNAME@
+    ;;
+    restart)
+        stop
+        start
+    ;;
+    reload)
+        killproc $PROG SIGHUP
+        RETVAL=$?
+        echo
+    ;;
+    condrestart)
+        if [ -f /var/lock/subsys/$PROG ]; then
+            stop
+            start
+            RETVAL=$?
+        fi
+    ;;
+    condreload)
+        if [ -f /var/lock/subsys/$PROG ]; then
+            killproc $PROG SIGHUP
+            RETVAL=$?
+            echo
+        fi
+    ;;
+    *)
+    echo "Usage: @PACKAGE_TARNAME@ {start|stop|status|reload|restart|condrestart|condreload"
+    exit 1
+    ;;
+esac
+exit $RETVAL
