@@ -66,6 +66,7 @@ static void process_request(libSocketServer &skt_server, LedServerThread &led_th
         case LSOP_SET_ALERT:
             std::cerr << "Set alert: " << (const char *)pkt.data << std::endl;
             pkt.opcode = LSOP_OK;
+            led_thread.PushOperation(LSOP_SET_ALERT, (const char *)pkt.data);
             break;
         case LSOP_GET_ALERTS:
             std::cerr << "Get alerts." << std::endl;
@@ -79,7 +80,7 @@ static void process_request(libSocketServer &skt_server, LedServerThread &led_th
         case LSOP_SET_MOODLIGHT:
             std::cerr << "Set moodlight: " << (const char *)pkt.data << std::endl;
             pkt.opcode = LSOP_OK;
-            led_thread.PushOperation(LSOP_SET_MOODLIGHT);
+            led_thread.PushOperation(LSOP_SET_MOODLIGHT, (const char *)pkt.data);
             break;
         case LSOP_GET_MOODLIGHTS:
             std::cerr << "Get moodlights." << std::endl;
@@ -98,6 +99,19 @@ static void process_request(libSocketServer &skt_server, LedServerThread &led_th
     else if (bytes == -1) return;
 
     bytes = skt_server.Write((unsigned char *)&pkt, LSPKT_MAX_LENGTH);
+}
+
+static void usage(int rc)
+{
+    std::cerr << "led-server <options>" << std::endl;
+    std::cerr << "  -s,--service <service>" << std::endl;
+    std::cerr << "    Specify service name/number (default: 3500)." << std::endl;
+    std::cerr << "  -d,--debug" << std::endl;
+    std::cerr << "    Enable debug mode." << std::endl;
+    std::cerr << "  -v,--version" << std::endl;
+    std::cerr << "    Display version and exit." << std::endl;
+
+    exit(rc);
 }
 
 int main(int argc, char *argv[])
@@ -133,7 +147,7 @@ int main(int argc, char *argv[])
             std::cerr << "Try --help for more information." << std::endl;
             return 1;
         case 'h':
-            return 0;
+            usage(0);
         }
     }
 

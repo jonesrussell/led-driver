@@ -87,10 +87,18 @@ void LedServerThread::PushOperation(int opcode, const std::string &param)
     pthread_mutex_unlock(mutex);
 }
 
-void LedServerThread::Delay(int ms)
+bool LedServerThread::Delay(int ms, bool interruptable)
 {
-    for (int i = ms; i > 0 && !terminate; i -= 100)
+    for (int i = ms; i > 0 && !terminate; i -= 100) {
+        if (interruptable) {
+            bool interrupt = false;
+            pthread_mutex_lock(mutex);
+            if (queue.size() > 0) interrupt = true;
+            pthread_mutex_unlock(mutex);
+            if (interrupt) return true;
+        }
         usleep(100 * 1000);
+    }
     if (terminate) pthread_exit(NULL);
 }
 
@@ -113,14 +121,13 @@ void LedServerThread::OpenDevices(void)
 
 void LedServerThread::Run(void)
 {
-    LedColors colors(LP_LEDS);
     struct LedOperation *op = NULL;
 
     for (int i = 0; !terminate; i++) {
         if (devices.size() == 0) {
             OpenDevices();
             if (devices.size() == 0) {
-                Delay(1000);
+                Delay(1000, false);
                 continue;
             }
         }
@@ -140,7 +147,10 @@ void LedServerThread::Run(void)
                 moodlight.clear();
                 break;
             case LSOP_SET_MOODLIGHT:
-                moodlight = "default";
+                moodlight = op->param;
+                break;
+            case LSOP_SET_ALERT:
+                alert = op->param;
                 break;
             default:
                 std::cerr << __func__ << ": unsupported opcode: "
@@ -152,12 +162,74 @@ void LedServerThread::Run(void)
             op = NULL;
         }
 
-        if (moodlight != "default") {
-            std::cerr << __func__ << ": no moodlight set" << std::endl;
-            Delay(1000);
+        if (alert.size()) Alert();
+        else if (moodlight.size()) Moodlight();
+        else {
+            //std::cerr << __func__ << ": nothing to do" << std::endl;
+            Delay(500);
             continue;
         }
+    }
+}
 
+void LedServerThread::Terminate(void)
+{
+    terminate = true;
+}
+
+void LedServerThread::Alert(void)
+{
+    LedColors black(LP_LEDS);
+    LedColors colors(LP_LEDS);
+
+    for (int l = 0; l < LP_LEDS; l++) {
+        black[l].r = black[l].g = black[l].b = 0;
+        colors[l].r = colors[l].g = colors[l].b = 255;
+    }
+
+    if (alert == "link-up") {
+        for (int l = 0; l < LP_LEDS; l++) {
+            colors[l].g = 255;
+            colors[l].r = colors[l].b = 0;
+        }
+    }
+    else if (alert == "link-down") {
+        for (int l = 0; l < LP_LEDS; l++) {
+            colors[l].r = 255;
+            colors[l].g = colors[l].b = 0;
+        }
+    }
+    else if (alert == "generic-warning") {
+        for (int l = 0; l < LP_LEDS; l++) {
+            colors[l].r = colors[l].g = 255;
+            colors[l].b = 0;
+        }
+    }
+
+    devices[0]->SetOption("smooth-slowdown", 0);
+    devices[0]->SetLedColors(black);
+    Delay(50, false);
+
+    for (int i = 0; i < 3; i++) {
+        devices[0]->SetLedColors(colors);
+        Delay(200, false);
+        devices[0]->SetLedColors(black);
+        Delay(50, false);
+    }
+
+    devices[0]->SetLedColors(colors);
+    devices[0]->SetOption("smooth-slowdown", 255);
+    Delay(1500, false);
+    devices[0]->SetLedColors(black);
+
+    alert.clear();
+}
+
+void LedServerThread::Moodlight(void)
+{
+    LedColors colors(LP_LEDS);
+
+    if (moodlight == "default") {
         for (int l = 0; l < LP_LEDS; l++) {
             switch (rand() % 7) {
             case 0:
@@ -199,13 +271,9 @@ void LedServerThread::Run(void)
         }
 
         devices[0]->SetLedColors(colors);
-        Delay(1500);
     }
-}
 
-void LedServerThread::Terminate(void)
-{
-    terminate = true;
+    Delay(1500);
 }
 
 // vi: expandtab shiftwidth=4 softtabstop=4 tabstop=4

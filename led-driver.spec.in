@@ -2,7 +2,7 @@
 Name: @PACKAGE_TARNAME@
 Version: @PACKAGE_VERSION@
 URL: @PACKAGE_URL@
-Release: 8%{dist}
+Release: 17%{dist}
 Vendor: Darryl Sokoloski <darryl@sokoloski.ca>
 License: GPL
 Group: Applications/Multimedia

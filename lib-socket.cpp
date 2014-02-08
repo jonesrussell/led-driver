@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -39,7 +40,7 @@ libSocketAbstract::libSocketAbstract()
 
 libSocketAbstract::~libSocketAbstract()
 {
-    if (sd != -1) close(sd);
+    if (sd > -1) close(sd);
 }
 
 ssize_t libSocketAbstract::Read(unsigned char *buffer, ssize_t length)
@@ -63,12 +64,12 @@ int libSocketAbstract::SetReadTimeout(int seconds)
     int rc;
     struct timeval tv;
 
-    tv.tv_sec = 1;
     tv.tv_usec = 0;
+    tv.tv_sec = seconds;
 
     if ((rc = setsockopt(sd,
         SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(struct timeval))) == -1) {
-        std::cerr << __func__ << ": error setting socket read time-out: %s"
+        std::cerr << __func__ << ": error setting socket read time-out: "
             << strerror(errno) << std::endl;
     }
 
@@ -82,9 +83,9 @@ libSocketClient::libSocketClient(const char *node, const char *service)
     struct addrinfo *result, *rp;
 
     memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = AF_INET6;
     hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_flags = 0;
+    hints.ai_flags = AI_V4MAPPED | AI_ALL;
     hints.ai_protocol = 0;
 
     int rc = getaddrinfo(node, service, &hints, &result);
@@ -97,7 +98,8 @@ libSocketClient::libSocketClient(const char *node, const char *service)
         sd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
 
         if (sd == -1) continue;
-        if (connect(sd, rp->ai_addr, rp->ai_addrlen) != -1) break;
+        if (connect(sd, rp->ai_addr, rp->ai_addrlen) != -1)
+            break;
 
         close(sd);
     }
@@ -117,9 +119,9 @@ libSocketServer::libSocketServer(const char *service)
     struct addrinfo *result, *rp;
 
     memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = AF_INET6;
     hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_flags = AI_PASSIVE;
+    hints.ai_flags = AI_PASSIVE | AI_V4MAPPED | AI_ALL;
     hints.ai_protocol = 0;
     hints.ai_canonname = NULL;
     hints.ai_addr = NULL;
@@ -135,8 +137,8 @@ libSocketServer::libSocketServer(const char *service)
         sd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
 
         if (sd == -1) continue;
-        if (bind(sd, rp->ai_addr, rp->ai_addrlen) == 0) break;
-
+        if (bind(sd, rp->ai_addr, rp->ai_addrlen) == 0)
+            break;
 
         close(sd);
     }
@@ -154,9 +156,10 @@ libSocketServer::libSocketServer(const char *service)
 
 ssize_t libSocketServer::Read(unsigned char *buffer, ssize_t length)
 {
+    ssize_t bytes;
     socklen_t peer_addr_len = sizeof(struct sockaddr_storage);
 
-    ssize_t bytes = recvfrom(sd, buffer, length, 0,
+    bytes = recvfrom(sd, buffer, length, 0,
         (struct sockaddr *)&peer_addr, &peer_addr_len);
 
     if (bytes != length)

@@ -37,8 +37,11 @@ public:
     void PushOperation(int opcode, const std::string &param);
 
 protected:
-    void Delay(int ms);
+    bool Delay(int ms, bool interruptable = true);
     void OpenDevices(void);
+
+    void Alert(void);
+    void Moodlight(void);
 
     bool terminate;
     pthread_mutex_t *mutex;

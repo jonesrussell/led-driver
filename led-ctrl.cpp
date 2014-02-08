@@ -38,6 +38,31 @@
 #include "ld-abstract.h"
 #include "ld-lightpack.h"
 
+static void usage(int rc)
+{
+    std::cerr << "led-ctrl <options>" << std::endl;
+    std::cerr << "  -n,--node <node>" << std::endl;
+    std::cerr << "    Specify node (host) address." << std::endl;
+    std::cerr << "  -s,--service <service>" << std::endl;
+    std::cerr << "    Specify service name/number (default: 3500)." << std::endl;
+    std::cerr << "  -f,--off" << std::endl;
+    std::cerr << "    Turn off all LEDs." << std::endl;
+    std::cerr << "  -a,--alert <alert>" << std::endl;
+    std::cerr << "    Display alert." << std::endl;
+    std::cerr << "  -A,--get-alerts" << std::endl;
+    std::cerr << "    List available alert types." << std::endl;
+    std::cerr << "  -m,--moodlight [<moodlight>]" << std::endl;
+    std::cerr << "    Start moodlight." << std::endl;
+    std::cerr << "  -M,--get-moodlights" << std::endl;
+    std::cerr << "    List available moodlight types." << std::endl;
+    std::cerr << "  -d,--debug" << std::endl;
+    std::cerr << "    Enable debug mode." << std::endl;
+    std::cerr << "  -v,--version" << std::endl;
+    std::cerr << "    Display version and exit." << std::endl;
+
+    exit(rc);
+}
+
 int main(int argc, char *argv[])
 {
     int rc, debug = 0;
@@ -81,7 +106,7 @@ int main(int argc, char *argv[])
             }
             pkt.opcode = LSOP_SET_ALERT;
             strncpy((char *)pkt.data, optarg, LSPKT_MAX_DATASIZE);
-            pkt.data[LSPKT_MAX_DATASIZE - 1]= 0;
+            pkt.data[LSPKT_MAX_DATASIZE - 1] = 0;
             break;
         case 'A':
             if (pkt.opcode != LSOP_NOP) {
@@ -100,7 +125,7 @@ int main(int argc, char *argv[])
                 strcpy((char *)pkt.data, "default");
             else {
                 strncpy((char *)pkt.data, optarg, LSPKT_MAX_DATASIZE);
-                pkt.data[LSPKT_MAX_DATASIZE - 1]= 0;
+                pkt.data[LSPKT_MAX_DATASIZE - 1] = 0;
             }
             break;
         case 'M':
@@ -125,7 +150,7 @@ int main(int argc, char *argv[])
             std::cerr << "Try --help for more information." << std::endl;
             return 1;
         case 'h':
-            return 0;
+            usage(0);
         }
     }
 
@@ -137,8 +162,7 @@ int main(int argc, char *argv[])
     libSocketClient skt_client(node, service);
     skt_client.SetReadTimeout(1);
 
-    ssize_t bytes;
-    bytes = skt_client.Write((unsigned char *)&pkt, LSPKT_MAX_LENGTH);
+    ssize_t bytes = skt_client.Write((unsigned char *)&pkt, LSPKT_MAX_LENGTH);
 
     for ( ; bytes == LSPKT_MAX_LENGTH; ) {
         bytes = skt_client.Read((unsigned char *)&pkt, LSPKT_MAX_LENGTH);
