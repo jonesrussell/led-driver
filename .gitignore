@@ -22,7 +22,7 @@ libtool
 stamp-h1
 .libs/
 led-ctrl
-libled-driver.la
-libled_driver_la-*
 led-server
 *.o
+*.lo
+*.la
