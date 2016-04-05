@@ -101,6 +101,8 @@ bool LedServerThread::Delay(int ms, bool interruptable)
         usleep(100 * 1000);
     }
     if (terminate) pthread_exit(NULL);
+
+    return false;
 }
 
 void LedServerThread::OpenDevices(void)

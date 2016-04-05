@@ -1,0 +1,13 @@
+[Unit]
+Description=LED Driver
+After=syslog.target network.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/led-driver/led-server.pid
+ExecStart=/usr/sbin/led-server
+User=root
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

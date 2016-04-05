@@ -53,7 +53,6 @@ static void *led_thread_main(void *param)
 
 static void process_request(libSocketServer &skt_server, LedServerThread &led_thread)
 {
-    int i;
     struct libSocketPacket pkt; 
     ssize_t bytes = skt_server.Read((unsigned char *)&pkt, LSPKT_MAX_LENGTH);
     if (bytes == LSPKT_MAX_LENGTH) {

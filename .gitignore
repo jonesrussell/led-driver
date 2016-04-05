@@ -9,13 +9,12 @@ config.status
 config.sub
 configure
 depcomp
+deploy/led-driver.init
 .deps/
 hidapi/*/.dirstamp
 install-sh
 *.la
 led-ctrl
-led-driver.init
-led-driver.spec
 led-server
 .libs/
 libtool
