@@ -152,7 +152,11 @@ int main(int argc, char *argv[])
     }
 
     if (!debug) {
-        daemon(0, 0);
+        if (daemon(0, 0) < 0) {
+            std::cerr << "Error whilst daemonizing: " <<
+                strerror(errno) << std::endl;
+            return 1;
+        }
 
         FILE *h_pid = fopen("/var/run/led-driver/led-server.pid", "w+");
         if (h_pid != NULL) {
