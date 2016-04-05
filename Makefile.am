@@ -3,7 +3,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = autogen.sh deploy
 
-STCHECK_CONFIGURE_FLAGS = \
+DISTCHECK_CONFIGURE_FLAGS = \
 	--with-systemdsystemunitdir=$$dc_install_base/$(systemdsystemunitdir)
 
 if HAVE_SYSTEMD
