@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 
-EXTRA_DIST = autogen.sh deploy
+EXTRA_DIST = autogen.sh deploy include hidapi
 
 DISTCHECK_CONFIGURE_FLAGS = \
 	--with-systemdsystemunitdir=$$dc_install_base/$(systemdsystemunitdir)
@@ -32,6 +32,4 @@ led_server_CXXFLAGS = ${AM_CXXFLAGS}
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status libtool
-dist-hook:
-	@cp -a $(srcdir)/hidapi $(distdir)
-	@cp -a $(srcdir)/include $(distdir)
+
