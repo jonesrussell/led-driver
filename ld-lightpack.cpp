@@ -116,7 +116,7 @@ void LedDriverLightpack::SetLedColors(LedColors &colors)
 
     memset(buffer_write, 0, LP_BUFFER_SIZE);
 
-    for (int i = 0; i < colors.size(); i++) {
+    for (unsigned i = 0; i < colors.size(); i++) {
         LedColor color;
 
         // Normalize to 12-bit

@@ -53,7 +53,6 @@ static void *led_thread_main(void *param)
 
 static void process_request(libSocketServer &skt_server, LedServerThread &led_thread)
 {
-    int i;
     struct libSocketPacket pkt; 
     ssize_t bytes = skt_server.Read((unsigned char *)&pkt, LSPKT_MAX_LENGTH);
     if (bytes == LSPKT_MAX_LENGTH) {
@@ -152,7 +151,11 @@ int main(int argc, char *argv[])
     }
 
     if (!debug) {
-        daemon(0, 0);
+        if (daemon(0, 0) < 0) {
+            std::cerr << "Error whilst daemonizing: " <<
+                strerror(errno) << std::endl;
+            return 1;
+        }
 
         FILE *h_pid = fopen("/var/run/led-driver/led-server.pid", "w+");
         if (h_pid != NULL) {

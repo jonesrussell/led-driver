@@ -1,7 +1,7 @@
 # LED Driver RPM spec
-Name: @PACKAGE_TARNAME@
-Version: @PACKAGE_VERSION@
-URL: @PACKAGE_URL@
+Name: led-driver
+Version: 1.1
+URL: http://sokoloski.ca/
 Release: 3%{dist}
 Vendor: Darryl Sokoloski <darryl@sokoloski.ca>
 License: GPL
@@ -16,7 +16,7 @@ BuildRequires: libusbx-devel glibc-headers
 
 %description
 Generic LED Driver with Lightpack support.
-For more information, visit: @PACKAGE_URL@
+For more information, visit: http://sokoloski.ca/
 
 # Build
 %prep
